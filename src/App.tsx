@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 import { Button } from "./components/ui/button";
-import { useDebounce } from "./hooks/use-debounce";
 import axios from "axios";
 
 
@@ -44,10 +43,6 @@ const App =() => {
     fetchQuote(); // Call fetchQuote again
   };
   
-
-const handleTweetQuote=()=>{
-
-}
 
   return ( 
     <div className="flex flex-col justify-center items-center h-screen
