@@ -1,56 +1,72 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "./components/ui/button";
+import { useDebounce } from "./hooks/use-debounce";
+import axios from "axios";
+
+
 interface Quote {
   quote: string;
   author: string;
 }
+const category = 'happiness';
+const apiUrl = `https://api.api-ninjas.com/v1/quotes?category=${category}`;
+const apiKey = 'oYqFmK4vlPZ5yVSxD6MCMA==qf6V1RCNElpizQXP';  // Replace with your actual API key
+const App =() => {
 
-
-const App = () => {
-
-  const [quoteData, setQuoteData] = useState<Quote | null>(null);
+  const [quoteData, setQuoteData] = useState<Quote | null>();
   const [error, setError] = useState<string | null>(null);
-  const category = 'happiness';
-  const apiUrl = `https://api.api-ninjas.com/v1/quotes?category=${category}`;
-  const apiKey = 'oYqFmK4vlPZ5yVSxD6MCMA==qf6V1RCNElpizQXP';  // Replace with your actual API key
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    
-    // Fetch data using Axios
-    const fetchQuote = async () => {
-      try {
-        const response = await axios.get(apiUrl, {
-          headers: { 'X-Api-Key': apiKey },
-        });
-        if (response.status === 200) {
-          setQuoteData(response.data[0]); // assuming response returns an array of quotes
-        }
-      } catch (err) {
-        setError('Error fetching the quote');
-        console.error(err);
+  const fetchQuote = async () => {
+    setLoading(true)
+    try {
+      const response = await axios.get(apiUrl, {
+        headers: { 'X-Api-Key': apiKey },
+      });
+      if (response.status === 200) {
+        setQuoteData(response.data[0]); // assuming response returns an array of quotes
       }
-    };
-
+    } catch (err) {
+      setError('Error fetching the quote');
+      console.error(err);
+    }
+    finally{
+      setLoading(false);
+    }
+  };
+  
+  // useEffect to fetch when component mounts
+  useEffect(() => {
     fetchQuote();
   }, [apiUrl, apiKey]);
+  
+  const handleNewQuote = () => {
+    fetchQuote(); // Call fetchQuote again
+  };
+  
+
+const handleTweetQuote=()=>{
+
+}
+
   return ( 
-    <div className="wrapper" id="quote-box">
+    <div className="flex flex-col justify-center items-center h-screen
+    " id="quote-box">
       {error && <p>{error}</p>}
-      {quoteData?
+      {quoteData &&! loading?
       <>
-      <h1 className="" id="text">{quoteData.quote}</h1>
+      <h1 className="md:w-" id="text">{quoteData.quote}</h1>
       <p className="font-bold" id="author">{quoteData.author}</p>
-      <Button id="new-quote">New Quote</Button>
-      <Button id="tweet-quote">Tweet Quote</Button>
+      <div className="mt-2">
+      <Button variant="secondary" id="new-quote" onClick={handleNewQuote}>New Quote</Button>
+      <Button variant="secondary" id="tweet-quote"><a href={`https://twitter.com/intent/tweet?text=${quoteData.quote}`}>Tweet Quote</a></Button>
+      </div>
       </>
       :
       <p>Loading...</p>
-}
+          }
       
     </div>
-
-
 
    );
 }
